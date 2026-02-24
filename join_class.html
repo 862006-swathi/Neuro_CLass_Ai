@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Join Class | NeuroClass AI</title>
+
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .card {
+            background: white;
+            width: 380px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            text-align: center;
+            transform: scale(0.9);
+            opacity: 0;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #11998e;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #11998e;
+        }
+
+        button {
+            background: #11998e;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+            opacity: 0;
+        }
+
+        .success {
+            color: #0a8f08;
+        }
+
+        .error {
+            color: #d60000;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Join a Class</h2>
+
+    <input type="text" id="student_id" placeholder="Student ID">
+    <input type="text" id="class_id" placeholder="Class ID (e.g. CLS_ABC123)">
+
+    <button id="joinBtn">Join Class</button>
+
+    <div id="msg" class="message"></div>
+</div>
+
+<script>
+    /* =========================
+       PAGE LOAD ANIMATION
+    ========================== */
+    gsap.to(".card", {
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out"
+    });
+
+    /* =========================
+       INPUT FOCUS ANIMATION
+    ========================== */
+    document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("focus", () => {
+            gsap.to(input, { scale: 1.03, duration: 0.2 });
+        });
+
+        input.addEventListener("blur", () => {
+            gsap.to(input, { scale: 1, duration: 0.2 });
+        });
+    });
+
+    /* =========================
+       BUTTON HOVER & CLICK
+    ========================== */
+    const btn = document.getElementById("joinBtn");
+
+    btn.addEventListener("mouseenter", () => {
+        gsap.to(btn, { scale: 1.05, duration: 0.2 });
+    });
+
+    btn.addEventListener("mouseleave", () => {
+        gsap.to(btn, { scale: 1, duration: 0.2 });
+    });
+
+    btn.addEventListener("mousedown", () => {
+        gsap.to(btn, { scale: 0.95, duration: 0.1 });
+    });
+
+    btn.addEventListener("mouseup", () => {
+        gsap.to(btn, { scale: 1.05, duration: 0.1 });
+    });
+
+    /* =========================
+       JOIN CLASS LOGIC
+    ========================== */
+    btn.addEventListener("click", joinClass);
+
+    function joinClass() {
+        const studentId = document.getElementById("student_id").value.trim();
+        const classId = document.getElementById("class_id").value.trim();
+        const msg = document.getElementById("msg");
+
+        msg.style.opacity = 0;
+
+        if (!studentId || !classId) {
+            msg.innerHTML = "❌ Student ID and Class ID are required";
+            msg.className = "message error";
+
+            gsap.to(msg, { opacity: 1, y: -5, duration: 0.4 });
+            return;
+        }
+
+        // Demo success animation
+        setTimeout(() => {
+            msg.innerHTML = "✅ Successfully joined the class!";
+            msg.className = "message success";
+
+            gsap.fromTo(msg,
+                { opacity: 0, y: 10 },
+                { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+            );
+
+            document.getElementById("student_id").value = "";
+            document.getElementById("class_id").value = "";
+        }, 700);
+    }
+</script>
+
+</body>
+</html>
