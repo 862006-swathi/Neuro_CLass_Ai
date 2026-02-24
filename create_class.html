@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Class | NeuroClass AI</title>
+
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            background: #ffffff;
+            width: 400px;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: scale(0.85);
+            opacity: 0;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2a5298;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #2a5298;
+        }
+
+        button {
+            background: #2a5298;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            opacity: 0;
+        }
+
+        .success { color: #0a8f08; }
+        .error { color: #d60000; }
+    </style>
+</head>
+
+<body>
+
+<div class="container" id="card">
+    <h2>Create New Class</h2>
+
+    <input type="text" id="class_name" placeholder="Class Name">
+    <input type="text" id="subject" placeholder="Subject">
+    <textarea id="description" placeholder="Class Description (optional)"></textarea>
+
+    <button id="createBtn">Create Class</button>
+
+    <div id="msg" class="message"></div>
+</div>
+
+<script>
+    /* =========================
+       CONTAINER INTRO
+    ========================== */
+    gsap.to("#card", {
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        ease: "power3.out"
+    });
+
+    /* =========================
+       STAGGER FORM ELEMENTS
+    ========================== */
+    gsap.from("#card input, #card textarea, #card button", {
+        y: 20,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.12,
+        delay: 0.3,
+        ease: "power2.out"
+    });
+
+    /* =========================
+       FLOATING IDLE EFFECT
+    ========================== */
+    gsap.to("#card", {
+        y: -8,
+        duration: 2.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+    });
+
+    /* =========================
+       CONTAINER HOVER LIFT
+    ========================== */
+    const card = document.getElementById("card");
+
+    card.addEventListener("mouseenter", () => {
+        gsap.to(card, {
+            scale: 1.03,
+            boxShadow: "0 30px 70px rgba(0,0,0,0.35)",
+            duration: 0.3
+        });
+    });
+
+    card.addEventListener("mouseleave", () => {
+        gsap.to(card, {
+            scale: 1,
+            boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+            duration: 0.3
+        });
+    });
+
+    /* =========================
+       INPUT / TEXTAREA FOCUS
+    ========================== */
+    document.querySelectorAll("input, textarea").forEach(el => {
+        el.addEventListener("focus", () => {
+            gsap.to(el, { scale: 1.03, duration: 0.2 });
+        });
+        el.addEventListener("blur", () => {
+            gsap.to(el, { scale: 1, duration: 0.2 });
+        });
+    });
+
+    /* =========================
+       BUTTON INTERACTIONS
+    ========================== */
+    const btn = document.getElementById("createBtn");
+
+    btn.addEventListener("mouseenter", () => {
+        gsap.to(btn, { scale: 1.05, duration: 0.2 });
+    });
+
+    btn.addEventListener("mouseleave", () => {
+        gsap.to(btn, { scale: 1, duration: 0.2 });
+    });
+
+    btn.addEventListener("mousedown", () => {
+        gsap.to(btn, { scale: 0.95, duration: 0.1 });
+    });
+
+    btn.addEventListener("mouseup", () => {
+        gsap.to(btn, { scale: 1.05, duration: 0.1 });
+    });
+
+    /* =========================
+       CREATE CLASS LOGIC
+    ========================== */
+    btn.addEventListener("click", createClass);
+
+    function createClass() {
+        const className = document.getElementById("class_name").value.trim();
+        const subject = document.getElementById("subject").value.trim();
+        const description = document.getElementById("description").value.trim();
+        const msg = document.getElementById("msg");
+
+        msg.style.opacity = 0;
+
+        if (!className || !subject) {
+            msg.innerHTML = "❌ Class name and subject are required";
+            msg.className = "message error";
+            gsap.to(msg, { opacity: 1, y: -5, duration: 0.4 });
+            return;
+        }
+
+        fetch("/create_class", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                class_name: className,
+                subject: subject,
+                description: description
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                msg.innerHTML = "✅ Class Created!<br>Class ID: " + data.class_id;
+                msg.className = "message success";
+
+                gsap.fromTo(msg,
+                    { opacity: 0, y: 10 },
+                    { opacity: 1, y: 0, duration: 0.5 }
+                );
+
+                document.getElementById("class_name").value = "";
+                document.getElementById("subject").value = "";
+                document.getElementById("description").value = "";
+            } else {
+                msg.innerHTML = "❌ " + data.error;
+                msg.className = "message error";
+                gsap.to(msg, { opacity: 1, y: -5, duration: 0.4 });
+            }
+        })
+        .catch(() => {
+            msg.innerHTML = "❌ Server error";
+            msg.className = "message error";
+            gsap.to(msg, { opacity: 1, y: -5, duration: 0.4 });
+        });
+    }
+</script>
+
+</body>
+</html>
